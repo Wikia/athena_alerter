@@ -1,0 +1,9 @@
+{
+  "start_date": "2019-01-21",
+  "start_timestamp": "2019-01-21 15:17:24",
+  "query_execution_id": "2bae702c-85a4-4944-974a-551a0ba4cc33",
+  "query_state": "SUCCEEDED",
+  "executing_user": "test",
+  "data_scanned": 329724698,
+  "query_sql": "select * from foo.bar"
+}

@@ -1,0 +1,22 @@
+{
+  "QueryExecution": {
+    "Query": "select * from foo.bar",
+    "QueryExecutionContext": {
+      "Database": "default"
+    },
+    "QueryExecutionId": "4f11bbcc-e604-46de-975e-66c66be80bd0",
+    "ResultConfiguration": {
+      "OutputLocation": "s3://output/4f11bbcc-e604-46de-975e-66c66be80bd0.csv"
+    },
+    "StatementType": "DML",
+    "Statistics": {
+      "DataScannedInBytes": 29944425990,
+      "EngineExecutionTimeInMillis": 9134
+    },
+    "Status": {
+      "CompletionDateTime": "",
+      "State": "SUCCEEDED",
+      "SubmissionDateTime": ""
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "Records": [
+    {
+      "eventName": "Dummy1"
+    },
+    {
+      "eventName": "Dummy2"
+    },
+    {
+      "eventVersion": "1.06",
+      "userIdentity": {
+        "type": "IAMUser",
+        "principalId": "XXX",
+        "arn": "arn:aws:iam::XXX",
+        "accountId": "XXX",
+        "accessKeyId": "XXX",
+        "userName": "testUser",
+        "sessionContext": {
+          "attributes": {
+            "creationDate": "2019-01-17T07:46:15Z",
+            "mfaAuthenticated": "true"
+          }
+        },
+        "invokedBy": "signin.amazonaws.com"
+      },
+      "eventTime": "2019-01-17T11:57:30Z",
+      "eventSource": "athena.amazonaws.com",
+      "eventName": "StartQueryExecution",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "XXX",
+      "userAgent": "signin.amazonaws.com",
+      "requestParameters": {
+        "queryString": "SELECT * FROM foo.bar",
+        "clientRequestToken": "XXXX",
+        "queryExecutionContext": {
+          "database": "foo"
+        },
+        "resultConfiguration": {
+          "outputLocation": "s3://aws-athena-query-results/Unsaved/2019/01/17/"
+        }
+      },
+      "responseElements": {
+        "queryExecutionId": "fda9a497-05e8-4c76-9734-561118eb3623"
+      },
+      "requestID": "37d19b84-93b8-499d-acfb-3c5e5b39cdaf",
+      "eventID": "668b4935-c680-4227-8343-e50cfae64652",
+      "readOnly": false,
+      "eventType": "AwsApiCall",
+      "managementEvent": true,
+      "recipientAccountId": "XXX"
+    }
+  ]
+}

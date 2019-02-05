@@ -1,0 +1,13 @@
+{
+  "Items": [
+      {
+        "data_scanned": 0,
+        "query_execution_id": "6acb55b1-fddd-4608-bef8-ed206e1262de",
+        "start_date": "2019-01-21",
+        "start_timestamp": "2019-01-21 09:34:13",
+        "query_state": "RUNNING",
+        "executing_user": "test",
+        "query_sql": ""
+      }
+    ]
+}
