@@ -1,4 +1,4 @@
-#Overview
+# Overview
 
 Athena Alerter is a tool which notifies users when they run an athena query which scans more than X bytes of data.
 
@@ -17,13 +17,13 @@ Athena alerter uses AWS infrastructure which you have to pay for. However, only 
 
 Enabling all features, enabling cloudtrail (not counting s3 log storage) and using cloudformation does not introduce additional costs.
 
-##Prerequisites
+## Prerequisites
 
 - Athena Alerter uses cloudtrail, which requires "All features" to be enabled on your AWS account. More on that can be found in AWS documentation - [Enabling all features](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_org_support-all-features.html),
 - You should create a s3 bucket to store the lambda code,
 - Your user account needs to have permissions to create all the resources used by athena alerter. If you're missing some, stack creation will fail and you'll see which permission you're lacking in the cloudformation console.
 
-##Deployment
+## Deployment
 
 Creation of all components required for Athena Alerter to function is done automatically via cloudformation. However, you need to provide a settings.py configuration file and corresponding input parameters for the makefile.
 
@@ -48,7 +48,7 @@ make LAMBDA_BUCKET=myorg-code-bucket LAMBDA_KEY=lambda/athena_alerter.zip CLOUDT
 
 Once executed you can track progress and see any potential errors occured during stack creation in the cloudformation console https://console.aws.amazon.com/cloudformation
 
-##Testing
+## Testing
 To run the provided unit tests you need to install requirements listed in requirements.txt. Ideally create a virtualenv for that. After that simply run unittest. i.e.
 
 ```
@@ -58,7 +58,7 @@ pip install -r ./../requirements.txt
 python -m unittest discover
 ```
 
-##Architecture
+## Architecture
 
 The tool consist of three lambda functions:
 - cloudtrail_handler - this function processes cloudtrail logs and adds entries to the DynamoDB table. At this stage we provide query, executing user, start time and execution id.
