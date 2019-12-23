@@ -21,7 +21,8 @@ class NotificatorTest(unittest.TestCase):
     def test_handle_batch_event(self, requests):
 
         config = Mock()
-        config.SLACK_ALERT_DATA_THRESHOLD = 100
+        config.SLACK_ALERT_DATA_USER_THRESHOLD = 100
+        config.SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 400
         config.SLACK_USER_MAPPINGS = {'test': 'mapped_user'}
         config.SLACK_MESSAGE = 'test message'
         config.SLACK_WEBHOOK_URL = 'url'

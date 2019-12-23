@@ -10,8 +10,11 @@ SLACK_BOT_TOKEN = ''
 #    'example_aws_user': 'IDXXXXXX'
 # }
 
-# Data scanned byte threshold above which to send notifications to users
-SLACK_ALERT_DATA_THRESHOLD = 100*1024*1024*1024
+# Data scanned byte threshold above which to send notifications to the user who submitted the query
+SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
+
+# Data scanned byte threshold above which to send notifications to the admin team channel
+SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
 
 # Slack message to be sent
 SLACK_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
