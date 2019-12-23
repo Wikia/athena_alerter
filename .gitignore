@@ -2,4 +2,5 @@
 bin/settings.py
 bin/venv
 lambda.zip
-
+venv/
+.idea/
