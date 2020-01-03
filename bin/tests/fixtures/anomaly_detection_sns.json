@@ -1,0 +1,18 @@
+{
+    "EventSource": "aws:sns",
+    "EventVersion": "1.0",
+    "EventSubscriptionArn": "arn:aws:sns:us-east-1:170047911957:athena_alerter_anomaly_detection_test:bd5aff0b-7646-4c6d-a892-e10eb29e451d",
+    "Sns": {
+        "Type": "Notification",
+        "MessageId": "e38ca9e2-727f-53c4-a623-ff6b149705b1",
+        "TopicArn": "arn:aws:sns:us-east-1:170047911957:athena_alerter_anomaly_detection_test",
+        "Subject": "ALARM: \"athena_alerter_anomaly_detection_jacek_test\" in US East (N. Virginia)",
+        "Message": "{\"AlarmName\":\"athena_alerter_anomaly_detection_jacek_test\",\"AlarmDescription\":\"todelete\",\"AWSAccountId\":\"170047911957\",\"NewStateValue\":\"ALARM\",\"NewStateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.00000002E8 (03/01/20 15:53:00)] was greater than the threshold (10000.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"StateChangeTime\":\"2020-01-03T15:58:32.049+0000\",\"Region\":\"US East (N. Virginia)\",\"OldStateValue\":\"INSUFFICIENT_DATA\",\"Trigger\":{\"MetricName\":\"athena_alerter_bytes_scanned_test\",\"Namespace\":\"athena_alerter\",\"StatisticType\":\"Statistic\",\"Statistic\":\"MAXIMUM\",\"Unit\":null,\"Dimensions\":[{\"value\":\"test\",\"name\":\"athena_user\"}],\"Period\":300,\"EvaluationPeriods\":1,\"ComparisonOperator\":\"GreaterThanThreshold\",\"Threshold\":10000.0,\"TreatMissingData\":\"- TreatMissingData:                    missing\",\"EvaluateLowSampleCountPercentile\":\"\"}}",
+        "Timestamp": "2020-01-03T15:58:32.103Z",
+        "SignatureVersion": "1",
+        "Signature": "OIB61dgWDmRO2SsLPKZsA8ZY+wT9LERKzg5xfVE/W6LbSs2IbF5hIJJdFDZgN10ZYe4K/xcTfwdwpcyk5VKAWHEBeWLBwdiya4wxM0u6YOCZwEWb1TlrZwk8azLxqCajPlXgkoyzw3JsHsLmXeuPpaTg+jYf0P7cPLeY/UIxcYL3VH2d7BkT14iwyjy7FijEfVsfphfTkC298Q8GbjjOD4hVtT1TypiyP+Ltg6+owv/Hd60WbZvd5jfRjaf0X1tnvrzW59AmMSs3bhE45ovvQGjzaVXchHVMZEmWGq11w2HgSFRTjt/o+04un+UUJg6O7Z+v8SNmI276FFYVLHF0Gw==",
+        "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem",
+        "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:170047911957:athena_alerter_anomaly_detection_test:bd5aff0b-7646-4c6d-a892-e10eb29e451d",
+        "MessageAttributes": {}
+    }
+}

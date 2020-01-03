@@ -16,8 +16,11 @@ SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
 # Data scanned byte threshold above which to send notifications to the admin team channel
 SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
 
-# Slack message to be sent
-SLACK_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
+# Slack message to be sent when hard threshold is crossed (the one specified in SLACK_ALERT_DATA_USER_THRESHOLD or SLACK_ALERT_DATA_CHANNEL_THRESHOLD)
+SLACK_HARD_THRESHOLD_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
+# Slack message to be sent when anomaly detection alerted about abnormally large query
+SLACK_ANOMALY_DETECTION_THRESHOLD_MESSAGE = '{subject}. User {user} issued an Athena query with a suspiciously large scanned volume: {new_state_reason}'
+
 
 # SQS queue url i.e. https://sqs.us-east-1.amazonaws.com/123456789012/athena-queries - note that you need to specify
 # this before that queue has been actually created. If in doubt you can always leave it empty and then update in
@@ -38,3 +41,10 @@ QUERIES_TABLE = 'athena_queries'
 #         m = re.search('{\"user\":\"([^\"]*)\".*', split[1])
 #         return m.group(1) if m is not None else None
 # USER_MAPPING_FUNCTION = mode_detect_user
+
+# If true, each query scanned size is to be sent to Cloudwatch as a metric
+USE_CLOUDWATCH_ANOMALY_DETECTION = True
+# name of the cloudwatch metric namespace to be submitted to cloudwatch
+CLOUDWATCH_METRIC_NAMESPACE = 'athena_alerter'
+# name of the metric to be submitted to cloudwatch
+CLOUDWATCH_METRIC_NAME = 'athena_alerter_bytes_scanned_test'

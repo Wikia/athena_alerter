@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import Mock, patch
 import requests
+import json
 
-from notification import Notificator
+from notification import HardThresholdNotificator, AnomalyDetectionNotificator, is_hard_threshold_event, is_anomaly_detecion_alert_event
 from tests import utils
 
 
@@ -23,9 +24,12 @@ class NotificatorTest(unittest.TestCase):
         config.SLACK_ALERT_DATA_USER_THRESHOLD = user_threshold
         config.SLACK_ALERT_DATA_CHANNEL_THRESHOLD = channel_threshold
         config.SLACK_USER_MAPPINGS = {'test': 'mapped_user'}
-        config.SLACK_MESSAGE = 'test message'
+        config.SLACK_HARD_THRESHOLD_MESSAGE = 'test message'
+        config.SLACK_ANOMALY_DETECTION_THRESHOLD_MESSAGE = 'test message anomaly'
         config.SLACK_WEBHOOK_URL = 'url'
         config.SLACK_BOT_TOKEN = 'token'
+        config.CLOUDWATCH_METRIC_NAMESPACE = 'athena_alerter'
+        config.CLOUDWATCH_METRIC_NAME = 'athena_alerter_bytes_scanned_test'
         return config
 
     @patch('notification.requests')
@@ -38,7 +42,7 @@ class NotificatorTest(unittest.TestCase):
 
         events = dict(Records=[dict(body=body)])
 
-        sut = Notificator(config)
+        sut = HardThresholdNotificator(config)
         sut.handle_batch_event(events)
 
         requests.post.assert_any_call('url', json={'text': 'test message', 'link_names': 1})
@@ -62,7 +66,7 @@ class NotificatorTest(unittest.TestCase):
 
         events = dict(Records=[dict(body=body)])
 
-        sut = Notificator(config)
+        sut = HardThresholdNotificator(config)
         sut.handle_batch_event(events)
 
         requests.post.assert_any_call('url', json={'text': 'test message', 'link_names': 1})
@@ -79,11 +83,37 @@ class NotificatorTest(unittest.TestCase):
 
         events = dict(Records=[dict(body=body)])
 
-        sut = Notificator(config)
+        sut = HardThresholdNotificator(config)
         sut.handle_batch_event(events)
 
         requests.post.assert_not_called()
 
+    @patch('notification.requests')
+    def test_anomaly_detection_notifier(self, requests):
+        requests.post.side_effect = NotificatorTest.requests_side_effect
+        requests.codes.ok = 200
+        config = NotificatorTest.prepare_config_mock(user_threshold=100, channel_threshold=100)
+        body = json.loads(utils.get_content('fixtures/anomaly_detection_sns.json'))
+        anomaly_not = AnomalyDetectionNotificator(config)
+        anomaly_not.handle_single_event(body)
+
+        requests.post.assert_any_call('url', json={'text': 'test message anomaly', 'link_names': 1})
+        requests.post.assert_any_call('https://slack.com/api/conversations.open',
+                                      headers={'Authorization': 'Bearer token'},
+                                      json={'users': 'mapped_user'})
+        requests.post.assert_any_call('https://slack.com/api/chat.postMessage',
+                                      headers={'Authorization': 'Bearer token'},
+                                      json={'channel': 'test_channel', 'text': 'test message anomaly'})
+
+    def test_is_anomaly_detecion_alert_event(self):
+        body = json.loads(utils.get_content('fixtures/anomaly_detection_sns.json'))
+        self.assertTrue(is_anomaly_detecion_alert_event(body))
+        self.assertFalse(is_hard_threshold_event(body))
+
+    def test_anomaly_detecion_alert_event_recognition(self):
+        body = json.loads(utils.get_content('fixtures/anomaly_detection_sns.json'))
+        self.assertTrue(is_anomaly_detecion_alert_event(body))
+        self.assertFalse(is_hard_threshold_event(body))
 
 if __name__ == '__main__':
     unittest.main()
