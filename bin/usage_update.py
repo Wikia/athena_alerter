@@ -19,25 +19,19 @@ def lambda_handler(event, context):
     athena = boto3.client('athena')
     sqs = boto3.client('sqs')
     dynamodb = boto3.resource('dynamodb')
-    if settings.USE_CLOUDWATCH_ANOMALY_DETECTION:
-        cloudwatch = boto3.client('cloudwatch')
-    else:
-        cloudwatch = None
-
     query_dao = QueryDao(settings, dynamodb)
 
-    updater = UsageUpdater(settings, query_dao, athena, sqs, cloudwatch)
+    updater = UsageUpdater(settings, query_dao, athena, sqs)
     updater.update_query_usage()
 
 
 class UsageUpdater:
 
-    def __init__(self, config, query_dao, athena, sqs, cloudwatch):
+    def __init__(self, config, query_dao, athena, sqs):
         self.config = config
         self.athena = athena
         self.sqs = sqs
         self.query_dao = query_dao
-        self.cloudwatch = cloudwatch
 
     def update_query_usage(self):
         queries = self.get_queries()

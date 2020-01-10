@@ -107,9 +107,9 @@ class AnomalyDetectionNotificator(Notificator):
             user = message.user
             params = dict(subject=subject, user=user, new_state_reason=new_state_reason)
             text = self.config.SLACK_ANOMALY_DETECTION_THRESHOLD_MESSAGE.format(**params)
+            self.send_slack_to_channel(text)
             if hasattr(self.config, 'SLACK_USER_MAPPINGS'):
                 slack_user = self.config.SLACK_USER_MAPPINGS.get(user)
-            self.send_slack_to_channel(text)
             if not slack_user:
                 logger.warning(f'Couldn\'t find slack user mapping for user {user}')
             else:
