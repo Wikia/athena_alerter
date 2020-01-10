@@ -15,6 +15,9 @@ Parameters:
   SQSQueueName:
     Type: String
     Description: Name of SQS queue with athena query events
+  SNSAnomalyDetectionTopicName:
+    Type: String
+    Description: Name of SNS queue with anomaly detection events
 Resources:
   QueriesDynamoDBTable:
     Type: 'AWS::DynamoDB::Table'
@@ -114,6 +117,10 @@ Resources:
       MessageRetentionPeriod: '345600'
       ReceiveMessageWaitTimeSeconds: '0'
       VisibilityTimeout: '30'
+  AthenaAnomalyDetectionQueue:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName: !Ref SNSAnomalyDetectionTopicName
   LambdaExecutionRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -236,11 +243,21 @@ Resources:
       SourceArn: !GetAtt
         - ScheduledRule
         - Arn
-  EventSourceMapping:
+  EventSourceMappingNotifierHardThreshold:
     Type: 'AWS::Lambda::EventSourceMapping'
     Properties:
       EventSourceArn: !GetAtt
         - AthenaQueriesQueue
+        - Arn
+      FunctionName: !GetAtt
+        - NotificationLambda
+        - Arn
+      BatchSize: 1
+  EventSourceMappingNotifierAnomalyDetection:
+    Type: 'AWS::Lambda::EventSourceMapping'
+    Properties:
+      EventSourceArn: !GetAtt
+        - AthenaAnomalyDetectionQueue
         - Arn
       FunctionName: !GetAtt
         - NotificationLambda

@@ -1,0 +1,41 @@
+provider "aws" {
+  profile    = "default"
+  region     = "us-east-1"
+}
+
+{% for user in users %}
+
+resource "aws_cloudwatch_metric_alarm" "slack_terraform_anomaly_detection_{{ user | replace(".", "_") | replace("@", "_at_") }}" {
+  alarm_name                = "slack_terraform_anomaly_detection_{{ user }}"
+  comparison_operator       = "GreaterThanUpperThreshold"
+  evaluation_periods        = "1"
+  threshold_metric_id       = "e1"
+  alarm_description         = "This metric monitors scanned size of athena query for user {{ user }}"
+  insufficient_data_actions = []
+  alarm_actions             = ["{{ alert_sns_queue_arn }}"]
+
+  metric_query {
+    id          = "e1"
+    expression  = "ANOMALY_DETECTION_BAND(m1)"
+    label       = "Scanned size"
+    return_data = "true"
+  }
+
+  metric_query {
+    id          = "m1"
+    return_data = "true"
+    metric {
+      metric_name = "{{ metric_name }}"
+      namespace   = "{{ namespace }}"
+      period      = "120"
+      stat        = "Maximum"
+      unit        = "Count"
+
+      dimensions = {
+        athena_user = "{{ user }}"
+      }
+    }
+  }
+}
+
+{% endfor %}

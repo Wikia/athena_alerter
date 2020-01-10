@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 
 import settings
 from query_dao import QueryDao
+from cloudwatch_metrics import CloudwatchMetrics
 from model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
 
 
@@ -18,7 +19,6 @@ def lambda_handler(event, context):
     athena = boto3.client('athena')
     sqs = boto3.client('sqs')
     dynamodb = boto3.resource('dynamodb')
-
     query_dao = QueryDao(settings, dynamodb)
 
     updater = UsageUpdater(settings, query_dao, athena, sqs)
@@ -48,6 +48,8 @@ class UsageUpdater:
                         query.executing_user = mapped_user
                 self.query_dao.update_query(query)
                 self.send_event_query_updated(query)
+                if settings.USE_CLOUDWATCH_ANOMALY_DETECTION:
+                    CloudwatchMetrics.report_query_metric(metric_value=details['data_scanned'], user=query.executing_user)
 
     #For easier mocking
     def now(self):
