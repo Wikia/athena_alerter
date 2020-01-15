@@ -6,7 +6,7 @@ provider "aws" {
 {% for user in users %}
 
 resource "aws_cloudwatch_metric_alarm" "slack_terraform_anomaly_detection_{{ user | replace(".", "_") | replace("@", "_at_") }}" {
-  alarm_name                = "slack_terraform_anomaly_detection_{{ user }}"
+  alarm_name                = "athena_alerter_anomaly_detection_{{ user }}"
   comparison_operator       = "GreaterThanUpperThreshold"
   evaluation_periods        = "1"
   threshold_metric_id       = "e1"
@@ -27,7 +27,7 @@ resource "aws_cloudwatch_metric_alarm" "slack_terraform_anomaly_detection_{{ use
     metric {
       metric_name = "{{ metric_name }}"
       namespace   = "{{ namespace }}"
-      period      = "120"
+      period      = "3600"
       stat        = "Maximum"
       unit        = "Count"
 
