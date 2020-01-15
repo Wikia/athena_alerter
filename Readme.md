@@ -35,7 +35,7 @@ To deploy Athena Alerter:
     - CLOUDTRAIL_BUCKET - name of s3 bucket in which to store cloudtrail logs. This bucket should not exist and will be created for you,
     - DYNAMODB_TABLE_NAME - name of dynamodb table which will be used for storing query data. The table should not exist and will be created for you. The name needs to match the QUERIES_TABLE parameter from settings.py,
     - SQS_QUEUE_NAME - name of sqs queue used for query finished events. The queue should not exists and will be created for you. The name needs to match the SQS_QUEUE_URL parameter from settings.py.
-    - SQS_ANOMALY_DETECTION_TOPIC_NAME - name to which cloudwatch pushes events about anomaly detection in query sizes. This value is used to connect the topic as input to notifier lambda function (setting metrics is done separately in terraform) - see anomaly detection section below
+    - SNS_ANOMALY_DETECTION_TOPIC_NAME - name to which cloudwatch pushes events about anomaly detection in query sizes. This value is used to connect the topic as input to notifier lambda function (setting metrics is done separately in terraform) - see anomaly detection section below
     
 Note that S3 bucket names need to be globally unique (that means for all aws accounts).
     
@@ -43,7 +43,7 @@ Sample deployment:
 ```
 cp bin/settings.py.template bin/settings.py
 vi settings.py # Or use any other editor and provide configuration
-make LAMBDA_BUCKET=myorg-code-bucket LAMBDA_KEY=lambda/athena_alerter.zip CLOUDTRAIL_BUCKET=myorg-cloudtrail DYNAMODB_TABLE_NAME=athena_queries SQS_QUEUE_NAME=athena_queries SQS_ANOMALY_DETECTION_TOPIC_NAME=athena_alerter_anomaly_detection run_cloudformation 
+make LAMBDA_BUCKET=myorg-code-bucket LAMBDA_KEY=lambda/athena_alerter.zip CLOUDTRAIL_BUCKET=myorg-cloudtrail DYNAMODB_TABLE_NAME=athena_queries SQS_QUEUE_NAME=athena_queries SNS_ANOMALY_DETECTION_TOPIC_NAME=athena_alerter_anomaly_detection run_cloudformation 
 
 ```
 
