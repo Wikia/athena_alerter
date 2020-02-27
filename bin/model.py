@@ -1,8 +1,9 @@
+import json
 from dataclasses import dataclass
 from enum import Enum
-import json
 
 TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 
 class QueryState(Enum):
     QUEUED = 'QUEUED'
@@ -22,6 +23,7 @@ class AthenaQuery:
     data_scanned: int = 0
     query_sql: str = None
 
+
 @dataclass
 class AnomalyDetectionEvent:
     """
@@ -32,6 +34,7 @@ class AnomalyDetectionEvent:
     EventVersion: str
     EventSubscriptionArn: str
     Sns: dict
+
 
 @dataclass
 class AnomalyDetectionSns:
@@ -51,11 +54,13 @@ class AnomalyDetectionSns:
     UnsubscribeUrl: str
     MessageAttributes: str
 
+
 class AnomalyDetectionMessage:
     """
     class corresponding to a part of sns message about anomaly detection from cloudwatch
     this one is specific to our cloudwatch metric anomaly detection alerts
     """
+
     def __init__(self, message_json):
         message = json.loads(message_json)
         self.new_state_value = message['NewStateValue']

@@ -6,14 +6,15 @@ Currently only slack notifications are supported
 
 import json
 import logging
-from botocore.vendored import requests
 from abc import ABC, abstractmethod
+
+import requests
 
 import settings
 from model import AthenaQuery, AnomalyDetectionEvent, AnomalyDetectionMessage, AnomalyDetectionSns
 
-
 logger = logging.getLogger()
+
 
 def lambda_handler(event, context):
     """
@@ -33,8 +34,10 @@ def lambda_handler(event, context):
             logging.debug(json.dumps(event))
             raise Exception("ERROR! Unknown event type!")
 
+
 def is_anomaly_detecion_alert_event(record):
     return 'EventSubscriptionArn' in record and 'anomaly_detection' in str.lower(record['EventSubscriptionArn'])
+
 
 def is_hard_threshold_event(record):
     return 'eventSourceARN' in record and 'athena-queries' in record['eventSourceARN']
@@ -115,6 +118,7 @@ class AnomalyDetectionNotificator(Notificator):
             else:
                 self.send_slack_to_user(slack_user, text)
 
+
 class HardThresholdNotificator(Notificator):
     """
     Handles notifications that an athena query has ended.
@@ -146,10 +150,10 @@ class HardThresholdNotificator(Notificator):
         if hasattr(self.config, 'SLACK_USER_MAPPINGS'):
             slack_user = self.config.SLACK_USER_MAPPINGS.get(query.executing_user)
         params = dict(
-            data_scanned_bytes = query.data_scanned,
-            data_scanned_gb = int(query.data_scanned / (1024*1024*1024)),
-            slack_user_id = slack_user,
-            user = query.executing_user
+            data_scanned_bytes=query.data_scanned,
+            data_scanned_gb=int(query.data_scanned / (1024 * 1024 * 1024)),
+            slack_user_id=slack_user,
+            user=query.executing_user
         )
 
         text = self.config.SLACK_HARD_THRESHOLD_MESSAGE.format(**params)

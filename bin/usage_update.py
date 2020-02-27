@@ -4,15 +4,16 @@ It sends sqs events when a query is finished.
 
 """
 
-import boto3
-import json
 import dataclasses
+import json
 from datetime import datetime, timedelta
 
+import boto3
+
 import settings
-from query_dao import QueryDao
 from cloudwatch_metrics import CloudwatchMetrics
-from model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
+from model import QueryState
+from query_dao import QueryDao
 
 
 def lambda_handler(event, context):
@@ -49,9 +50,10 @@ class UsageUpdater:
                 self.query_dao.update_query(query)
                 self.send_event_query_updated(query)
                 if settings.USE_CLOUDWATCH_ANOMALY_DETECTION:
-                    CloudwatchMetrics.report_query_metric(metric_value=details['data_scanned'], user=query.executing_user)
+                    CloudwatchMetrics.report_query_metric(metric_value=details['data_scanned'],
+                                                          user=query.executing_user)
 
-    #For easier mocking
+    # For easier mocking
     def now(self):
         return datetime.now()
 
