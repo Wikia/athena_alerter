@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import requests
 import json
 
-from notification import HardThresholdNotificator, AnomalyDetectionNotificator, is_hard_threshold_event, is_anomaly_detecion_alert_event
+from notificators.hard_threshold_notificator import HardThresholdNotificator
 from tests import utils
 
 

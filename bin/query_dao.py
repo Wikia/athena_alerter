@@ -1,8 +1,9 @@
 from dataclasses import asdict
 from datetime import datetime
+
 from boto3.dynamodb.conditions import Key, Attr
 
-from model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
+from model import AthenaQuery, TIMESTAMP_FORMAT
 
 
 class QueryDao:
@@ -12,7 +13,7 @@ class QueryDao:
         self.dynamodb = dynamodb
 
     def insert_query(self, query):
-        #Dyamodb does not support empty strings, so we need to drop such attributes
+        # DynamoDB does not support empty strings, so we need to drop such attributes
         query_dict = {key: value for key, value in asdict(query).items() if value is not None}
         self.dynamodb.Table(self.config.QUERIES_TABLE).put_item(Item=query_dict)
 

@@ -18,70 +18,10 @@ Parameters:
   SNSAnomalyDetectionTopicName:
     Type: String
     Description: Name of SNS queue with anomaly detection events
+  RequestsLayer:
+    Type: String
+    Description: ARN address of Lambda Layer with python3's requests - you may need to host your own
 Resources:
-  QueriesDynamoDBTable:
-    Type: 'AWS::DynamoDB::Table'
-    Properties:
-      TableName: !Ref DynamoDBTableName
-      AttributeDefinitions:
-        -
-          AttributeName: start_date
-          AttributeType: S
-        -
-          AttributeName: start_timestamp
-          AttributeType: S
-      KeySchema:
-        -
-          AttributeName: start_date
-          KeyType: HASH
-        -
-          AttributeName: start_timestamp
-          KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: '5'
-        WriteCapacityUnits: '5'
-  CloudtrailWriteLogs:
-    Type: 'AWS::CloudTrail::Trail'
-    DependsOn: CloudtrailBucketPolicy
-    Properties:
-      IncludeGlobalServiceEvents: true
-      IsLogging: 'true'
-      S3BucketName: !Ref CloudtrailS3Bucket
-  CloudtrailBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket:
-        Ref: CloudtrailS3Bucket
-      PolicyDocument:
-        Statement:
-          -
-            Action:
-              - "s3:GetBucketAcl"
-            Effect: "Allow"
-            Resource:
-              Fn::Join:
-                - ""
-                -
-                  - "arn:aws:s3:::"
-                  - Ref: "CloudtrailBucket"
-            Principal:
-              Service: "cloudtrail.amazonaws.com"
-          -
-            Action:
-              - "s3:PutObject"
-            Effect: "Allow"
-            Resource:
-              Fn::Join:
-                - ""
-                -
-                  - "arn:aws:s3:::"
-                  - Ref: "CloudtrailBucket"
-                  - "/*"
-            Principal:
-              Service: "cloudtrail.amazonaws.com"
-            Condition:
-              StringEquals:
-                "s3:x-amz-acl": "bucket-owner-full-control"
   S3CloudtrailLambdaPolicy:
     Type: 'AWS::Lambda::Permission'
     Properties:
@@ -91,36 +31,6 @@ Resources:
       Action: 'lambda:InvokeFunction'
       Principal: s3.amazonaws.com
       SourceAccount: !Ref 'AWS::AccountId'
-  CloudtrailS3Bucket:
-    Type: 'AWS::S3::Bucket'
-    DependsOn: S3CloudtrailLambdaPolicy
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
-      BucketName: !Ref CloudtrailBucket
-      NotificationConfiguration:
-        LambdaConfigurations:
-          -
-            Function: !GetAtt
-              - CloudtrailHandlerLambda
-              - Arn
-            Event: 's3:ObjectCreated:*'
-  AthenaQueriesQueue:
-    Type: 'AWS::SQS::Queue'
-    Properties:
-      QueueName: !Ref SQSQueueName
-      DelaySeconds: '0'
-      MaximumMessageSize: '262144'
-      MessageRetentionPeriod: '345600'
-      ReceiveMessageWaitTimeSeconds: '0'
-      VisibilityTimeout: '30'
-  AthenaAnomalyDetectionQueue:
-    Type: 'AWS::SNS::Topic'
-    Properties:
-      TopicName: !Ref SNSAnomalyDetectionTopicName
   LambdaExecutionRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -157,6 +67,16 @@ Resources:
                     - !Ref SQSQueueName
               - Effect: Allow
                 Action:
+                  - 'sqs:ReceiveMessage'
+                  - 'sqs:SendMessage'
+                  - 'sqs:DeleteMessage'
+                  - 'sqs:GetQueueAttributes'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:sqs:*:*:'
+                    - 'athena_alerter_anomaly_detection'
+              - Effect: Allow
+                Action:
                   - 'dynamodb:BatchGetItem'
                   - 'dynamodb:GetItem'
                   - 'dynamodb:Query'
@@ -188,10 +108,12 @@ Resources:
       Description: Handles cloudtrail logs and writes athena queries to DynamoDB
       FunctionName: athena_alerter_cloudtrail_handler
       Handler: cloudtrail_handler.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
       MemorySize: 128
       Role: !GetAtt
-          - LambdaExecutionRole
-          - Arn
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.7
       Timeout: 10
   UsageUpdateLambda:
@@ -203,10 +125,12 @@ Resources:
       Description: Updates athena data scanned stats in DynamoDB
       FunctionName: athena_alerter_usage_updater
       Handler: usage_update.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
       MemorySize: 128
       Role: !GetAtt
-          - LambdaExecutionRole
-          - Arn
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.7
       Timeout: 10
   NotificationLambda:
@@ -218,10 +142,12 @@ Resources:
       Description: Updates athena data scanned stats in DynamoDB
       FunctionName: athena_alerter_notification
       Handler: notification.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
       MemorySize: 128
       Role: !GetAtt
-          - LambdaExecutionRole
-          - Arn
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.7
       Timeout: 10
   ScheduledRule:
@@ -231,8 +157,8 @@ Resources:
       ScheduleExpression: 'rate(1 minute)'
       Targets:
         - Arn: !GetAtt
-          - UsageUpdateLambda
-          - Arn
+            - UsageUpdateLambda
+            - Arn
           Id: UsageUpdateLambda
   PermissionForEventsToInvokeLambda:
     Type: 'AWS::Lambda::Permission'
@@ -243,22 +169,10 @@ Resources:
       SourceArn: !GetAtt
         - ScheduledRule
         - Arn
-  EventSourceMappingNotifierHardThreshold:
-    Type: 'AWS::Lambda::EventSourceMapping'
-    Properties:
-      EventSourceArn: !GetAtt
-        - AthenaQueriesQueue
-        - Arn
-      FunctionName: !GetAtt
-        - NotificationLambda
-        - Arn
-      BatchSize: 1
   EventSourceMappingNotifierAnomalyDetection:
     Type: 'AWS::Lambda::EventSourceMapping'
     Properties:
-      EventSourceArn: !GetAtt
-        - AthenaAnomalyDetectionQueue
-        - Arn
+      EventSourceArn: 'arn:aws:sqs:us-east-1:170047911957:athena_alerter_anomaly_detection'
       FunctionName: !GetAtt
         - NotificationLambda
         - Arn
