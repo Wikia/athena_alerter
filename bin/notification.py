@@ -8,8 +8,9 @@ import json
 import logging
 from typing import Sequence
 
-import settings
-from notificators.notificator import Notificator
+from . import settings
+from .model import UnknownEventException
+from .notificators.notificator import Notificator
 
 logger = logging.getLogger()
 
@@ -30,6 +31,6 @@ def lambda_handler(event, context):
         else:
             logging.error("ERROR! Unknown event type!")
             logging.debug(json.dumps(event))
-            raise Exception("ERROR! Unknown event type!")
+            raise UnknownEventException("ERROR! Unknown event type!")
 
 

@@ -22,3 +22,6 @@ class AthenaQuery:
     data_scanned: int = 0
     query_sql: str = None
 
+
+class UnknownEventException(Exception):
+    pass

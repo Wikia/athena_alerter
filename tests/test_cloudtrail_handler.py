@@ -4,8 +4,8 @@ from unittest.mock import Mock
 import gzip
 from io import BytesIO
 
-from model import AthenaQuery
-from cloudtrail_handler import CloudtrailHandler
+from bin.model import AthenaQuery
+from bin.cloudtrail_handler import CloudtrailHandler
 
 
 class CloudtrailHandlerTest(unittest.TestCase):

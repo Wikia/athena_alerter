@@ -1,6 +1,6 @@
 import boto3
 
-import settings
+from . import settings
 
 """
 This class sends metrics about finished athena queries to Cloudwatch

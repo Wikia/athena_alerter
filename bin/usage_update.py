@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 
 import boto3
 
-import settings
-from model import QueryState
-from query_dao import QueryDao
+from . import settings
+from .model import QueryState
+from .query_dao import QueryDao
 
 
 def lambda_handler(event, context):

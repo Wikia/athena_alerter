@@ -11,9 +11,9 @@ from io import BytesIO
 
 import boto3
 
-import settings
-from model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
-from query_dao import QueryDao
+from . import settings
+from .model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
+from .query_dao import QueryDao
 
 CLOUDTRAIL_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 

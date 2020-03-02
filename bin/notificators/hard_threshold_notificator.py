@@ -2,8 +2,8 @@ import json
 import logging
 from typing import Mapping
 
-from model import AthenaQuery
-from notificators.notificator import Notificator
+from ..model import AthenaQuery
+from .notificator import Notificator
 
 logger = logging.getLogger()
 

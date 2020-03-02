@@ -2,9 +2,9 @@ import unittest
 from datetime import datetime, date
 from unittest.mock import Mock
 
-from query_dao import QueryDao
-from model import AthenaQuery
-from tests import utils
+from . import utils
+from bin.query_dao import QueryDao
+from bin.model import AthenaQuery
 
 
 class QueryDaoTest(unittest.TestCase):

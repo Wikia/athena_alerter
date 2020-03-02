@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+test:
+	python -m unittest discover
+
 zip_lambda:
 	pushd bin && zip -r ../lambda.zip . && popd
 

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from boto3.dynamodb.conditions import Key, Attr
 
-from model import AthenaQuery, TIMESTAMP_FORMAT
+from .model import AthenaQuery, TIMESTAMP_FORMAT
 
 
 class QueryDao:
