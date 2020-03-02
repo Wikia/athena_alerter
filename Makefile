@@ -4,7 +4,7 @@ test:
 	python -m unittest discover
 
 zip_lambda:
-	pushd bin && zip -r ../lambda.zip . && popd
+	zip -r lambda.zip bin
 
 upload_lambda: zip_lambda
 	aws s3 cp lambda.zip "s3://$(LAMBDA_BUCKET)/$(LAMBDA_KEY)"

@@ -174,7 +174,7 @@ Resources:
         S3Key: !Ref LambdaS3Key
       Description: Handles cloudtrail logs and writes athena queries to DynamoDB
       FunctionName: athena_alerter_cloudtrail_handler
-      Handler: cloudtrail_handler.lambda_handler
+      Handler: bin.cloudtrail_handler.lambda_handler
       Layers:
         - !Ref RequestsLayer
       MemorySize: 128
@@ -191,7 +191,7 @@ Resources:
         S3Key: !Ref LambdaS3Key
       Description: Updates athena data scanned stats in DynamoDB
       FunctionName: athena_alerter_usage_updater
-      Handler: usage_update.lambda_handler
+      Handler: bin.usage_update.lambda_handler
       Layers:
         - !Ref RequestsLayer
       MemorySize: 128
@@ -208,7 +208,7 @@ Resources:
         S3Key: !Ref LambdaS3Key
       Description: Updates athena data scanned stats in DynamoDB
       FunctionName: athena_alerter_notification
-      Handler: notification.lambda_handler
+      Handler: bin.notification.lambda_handler
       Layers:
         - !Ref RequestsLayer
       MemorySize: 128
