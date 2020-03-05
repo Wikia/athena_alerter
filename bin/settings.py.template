@@ -1,3 +1,5 @@
+## GENERAL CONFIG
+
 # URL of your slack webhook https://api.slack.com/incoming-webhooks
 SLACK_WEBHOOK_URL = ''
 
@@ -10,29 +12,17 @@ SLACK_BOT_TOKEN = ''
 #    'example_aws_user': 'IDXXXXXX'
 # }
 
-# Data scanned byte threshold above which to send notifications to the user who submitted the query
-SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
-
-# Data scanned byte threshold above which to send notifications to the admin team channel
-SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
-
-# Slack message to be sent when hard threshold is crossed (the one specified in SLACK_ALERT_DATA_USER_THRESHOLD or SLACK_ALERT_DATA_CHANNEL_THRESHOLD)
-SLACK_HARD_THRESHOLD_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
-# Slack message to be sent when anomaly detection alerted about abnormally large query
-SLACK_ANOMALY_DETECTION_THRESHOLD_MESSAGE = '{subject}. User {user} issued an Athena query with a suspiciously large scanned volume: {new_state_reason}'
-
-
 # SQS queue url i.e. https://sqs.us-east-1.amazonaws.com/123456789012/athena-queries - note that you need to specify
 # this before that queue has been actually created. If in doubt you can always leave it empty and then update in
 # lambda aws console with the created url after cloudformation has run.
 SQS_QUEUE_URL = ''
 
-# DynamoDB table name
-QUERIES_TABLE = 'athena_queries'
-
 # Optional function which detects and overrides the user name based on query content.
 # Some analytical tools (i.e. mode analytics) provide user name in query as a comment
 # USER_MAPPING_FUNCTION
+
+# DynamoDB table name
+QUERIES_TABLE = 'athena_queries'
 
 # Sample user mapping function for mode analytics:
 # def mode_detect_user(query):
@@ -42,9 +32,27 @@ QUERIES_TABLE = 'athena_queries'
 #         return m.group(1) if m is not None else None
 # USER_MAPPING_FUNCTION = mode_detect_user
 
-# If true, each query scanned size is to be sent to Cloudwatch as a metric
-USE_CLOUDWATCH_ANOMALY_DETECTION = True
 # name of the cloudwatch metric namespace to be submitted to cloudwatch
 CLOUDWATCH_METRIC_NAMESPACE = 'athena_alerter'
 # name of the metric to be submitted to cloudwatch
 CLOUDWATCH_METRIC_NAME = 'athena_alerter_bytes_scanned_test'
+
+
+## CUSTOM NOTIFICATORS
+
+# Sequence containing classes of Notificators (e.g. hard threshold or ML based Anomaly Detection) to be used
+# by default only HardThresholdNotificator is available
+# from notificators.hard_threshold_notificator import HardThresholdNotificator
+NOTIFICATORS = [HardThresholdNotificator]
+
+
+## HardThresholdNotificator CONFIGURATION
+
+# Data scanned byte threshold above which to send notifications to the user who submitted the query
+SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
+
+# Data scanned byte threshold above which to send notifications to the admin team channel
+SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
+
+# Slack message to be sent when hard threshold is crossed (the one specified in SLACK_ALERT_DATA_USER_THRESHOLD or SLACK_ALERT_DATA_CHANNEL_THRESHOLD)
+SLACK_HARD_THRESHOLD_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'

@@ -1,11 +1,10 @@
 import unittest
 from datetime import datetime, date
 from unittest.mock import Mock, patch
-from boto3.dynamodb.conditions import Key, Attr
 
-from usage_update import UsageUpdater
-from tests import utils
-from model import AthenaQuery
+from . import utils
+from bin.usage_update import UsageUpdater
+from bin.model import AthenaQuery
 
 
 def mocked_get_now():
@@ -13,7 +12,7 @@ def mocked_get_now():
 
 class UsageUpdaterTest(unittest.TestCase):
     
-    @patch('usage_update.UsageUpdater.now', side_effect=mocked_get_now)
+    @patch('bin.usage_update.UsageUpdater.now', side_effect=mocked_get_now)
     def test_update_query_usage(self, mock_obj):
         query_execution_id = '6acb55b1-fddd-4608-bef8-ed206e1262de'
 
@@ -33,7 +32,7 @@ class UsageUpdaterTest(unittest.TestCase):
             query_sql='')]
 
         athena = Mock()
-        athena.get_query_execution.return_value=utils.get_json_content('fixtures/usage_update_athena_queries.json')
+        athena.get_query_execution.return_value= utils.get_json_content('fixtures/usage_update_athena_queries.json')
 
         sqs = Mock()
 

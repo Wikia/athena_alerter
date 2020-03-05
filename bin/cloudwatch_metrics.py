@@ -1,11 +1,13 @@
 import boto3
-import settings
+
+from . import settings
 
 """
-This class sends metrics about finished athena queryies to cloudwatch
+This class sends metrics about finished athena queries to Cloudwatch
 """
+
+
 class CloudwatchMetrics:
-
     cloudwatch = boto3.client('cloudwatch')
 
     @classmethod

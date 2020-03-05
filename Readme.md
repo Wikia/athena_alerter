@@ -21,6 +21,7 @@ Enabling all features, enabling cloudtrail (not counting s3 log storage) and usi
 
 - Athena Alerter uses cloudtrail, which requires "All features" to be enabled on your AWS account. More on that can be found in AWS documentation - [Enabling all features](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_org_support-all-features.html),
 - You should create a s3 bucket to store the lambda code,
+- Host your own Lambda Layer with python3's `requests` or e.g. use communities' from your region: https://github.com/keithrozario/Klayers/tree/master/deployments/python3.7/arns
 - Your user account needs to have permissions to create all the resources used by athena alerter. If you're missing some, stack creation will fail and you'll see which permission you're lacking in the cloudformation console.
 
 ## Deployment
@@ -35,7 +36,7 @@ To deploy Athena Alerter:
     - CLOUDTRAIL_BUCKET - name of s3 bucket in which to store cloudtrail logs. This bucket should not exist and will be created for you,
     - DYNAMODB_TABLE_NAME - name of dynamodb table which will be used for storing query data. The table should not exist and will be created for you. The name needs to match the QUERIES_TABLE parameter from settings.py,
     - SQS_QUEUE_NAME - name of sqs queue used for query finished events. The queue should not exists and will be created for you. The name needs to match the SQS_QUEUE_URL parameter from settings.py.
-    - SNS_ANOMALY_DETECTION_TOPIC_NAME - name to which cloudwatch pushes events about anomaly detection in query sizes. This value is used to connect the topic as input to notifier lambda function (setting metrics is done separately in terraform) - see anomaly detection section below
+    - REQUESTS_LAYER - ARN address to Lambda Layer containing `requests`
     
 Note that S3 bucket names need to be globally unique (that means for all aws accounts).
     
@@ -43,7 +44,7 @@ Sample deployment:
 ```
 cp bin/settings.py.template bin/settings.py
 vi settings.py # Or use any other editor and provide configuration
-make LAMBDA_BUCKET=myorg-code-bucket LAMBDA_KEY=lambda/athena_alerter.zip CLOUDTRAIL_BUCKET=myorg-cloudtrail DYNAMODB_TABLE_NAME=athena_queries SQS_QUEUE_NAME=athena_queries SNS_ANOMALY_DETECTION_TOPIC_NAME=athena_alerter_anomaly_detection run_cloudformation 
+make LAMBDA_BUCKET=myorg-code-bucket LAMBDA_KEY=lambda/athena_alerter.zip CLOUDTRAIL_BUCKET=myorg-cloudtrail DYNAMODB_TABLE_NAME=athena_queries SQS_QUEUE_NAME=athena_queries run_cloudformation 
 
 ```
 
@@ -67,13 +68,3 @@ The tool consist of three lambda functions:
 - notification - this function runs for each sqs event, checks whether the amount of data scanned exceeded the notification threshold and if so, generates a slack message. If you want to process the data scanned information differently, this function can be easily replaced with your own implementation.
 
 Note that because of the nature of cloudtrail log processing, notifications arrive a few minutes after the actual query has started.
-
-# Anomaly detection 
-
-Apart from the basic functionality described above, Athena Alerter may also be used in combination with Cloudwatch for notifying users about abnormally large queries.
-Cloudwatch Metrics and Cloudwatch Anomaly Detection Alerts are used in this scenario.
-You mat switch on/off this using Anomaly Detection with USE_CLOUDWATCH_ANOMALY_DETECTION switch in settings.py.
-When set to true, UsageUpdater reports all finished queries to Cloudwatch as metrics.
-Next, in cloudwatch we need to create anomaly detection alerts on these metrics (one alert per user).
-The alerts may be created using using files in terraform directory (see readme file there).
-Finally, when Cloudwatch will start sending anomaly detection messages to appropriate queue, an AnomalyDetectionNotificator class in notification.py will handle these messages and send appropriate notifications to slack.

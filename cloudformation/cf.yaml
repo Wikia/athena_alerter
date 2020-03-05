@@ -15,27 +15,23 @@ Parameters:
   SQSQueueName:
     Type: String
     Description: Name of SQS queue with athena query events
-  SNSAnomalyDetectionTopicName:
+  RequestsLayer:
     Type: String
-    Description: Name of SNS queue with anomaly detection events
+    Description: ARN address of Lambda Layer with python3's requests - you may need to host your own
 Resources:
   QueriesDynamoDBTable:
     Type: 'AWS::DynamoDB::Table'
     Properties:
       TableName: !Ref DynamoDBTableName
       AttributeDefinitions:
-        -
-          AttributeName: start_date
+        - AttributeName: start_date
           AttributeType: S
-        -
-          AttributeName: start_timestamp
+        - AttributeName: start_timestamp
           AttributeType: S
       KeySchema:
-        -
-          AttributeName: start_date
+        - AttributeName: start_date
           KeyType: HASH
-        -
-          AttributeName: start_timestamp
+        - AttributeName: start_timestamp
           KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: '5'
@@ -54,27 +50,23 @@ Resources:
         Ref: CloudtrailS3Bucket
       PolicyDocument:
         Statement:
-          -
-            Action:
+          - Action:
               - "s3:GetBucketAcl"
             Effect: "Allow"
             Resource:
               Fn::Join:
                 - ""
-                -
-                  - "arn:aws:s3:::"
+                - - "arn:aws:s3:::"
                   - Ref: "CloudtrailBucket"
             Principal:
               Service: "cloudtrail.amazonaws.com"
-          -
-            Action:
+          - Action:
               - "s3:PutObject"
             Effect: "Allow"
             Resource:
               Fn::Join:
                 - ""
-                -
-                  - "arn:aws:s3:::"
+                - - "arn:aws:s3:::"
                   - Ref: "CloudtrailBucket"
                   - "/*"
             Principal:
@@ -103,8 +95,7 @@ Resources:
       BucketName: !Ref CloudtrailBucket
       NotificationConfiguration:
         LambdaConfigurations:
-          -
-            Function: !GetAtt
+          - Function: !GetAtt
               - CloudtrailHandlerLambda
               - Arn
             Event: 's3:ObjectCreated:*'
@@ -117,10 +108,6 @@ Resources:
       MessageRetentionPeriod: '345600'
       ReceiveMessageWaitTimeSeconds: '0'
       VisibilityTimeout: '30'
-  AthenaAnomalyDetectionQueue:
-    Type: 'AWS::SNS::Topic'
-    Properties:
-      TopicName: !Ref SNSAnomalyDetectionTopicName
   LambdaExecutionRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -187,11 +174,13 @@ Resources:
         S3Key: !Ref LambdaS3Key
       Description: Handles cloudtrail logs and writes athena queries to DynamoDB
       FunctionName: athena_alerter_cloudtrail_handler
-      Handler: cloudtrail_handler.lambda_handler
+      Handler: bin.cloudtrail_handler.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
       MemorySize: 128
       Role: !GetAtt
-          - LambdaExecutionRole
-          - Arn
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.7
       Timeout: 10
   UsageUpdateLambda:
@@ -202,11 +191,13 @@ Resources:
         S3Key: !Ref LambdaS3Key
       Description: Updates athena data scanned stats in DynamoDB
       FunctionName: athena_alerter_usage_updater
-      Handler: usage_update.lambda_handler
+      Handler: bin.usage_update.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
       MemorySize: 128
       Role: !GetAtt
-          - LambdaExecutionRole
-          - Arn
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.7
       Timeout: 10
   NotificationLambda:
@@ -217,11 +208,13 @@ Resources:
         S3Key: !Ref LambdaS3Key
       Description: Updates athena data scanned stats in DynamoDB
       FunctionName: athena_alerter_notification
-      Handler: notification.lambda_handler
+      Handler: bin.notification.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
       MemorySize: 128
       Role: !GetAtt
-          - LambdaExecutionRole
-          - Arn
+        - LambdaExecutionRole
+        - Arn
       Runtime: python3.7
       Timeout: 10
   ScheduledRule:
@@ -231,8 +224,8 @@ Resources:
       ScheduleExpression: 'rate(1 minute)'
       Targets:
         - Arn: !GetAtt
-          - UsageUpdateLambda
-          - Arn
+            - UsageUpdateLambda
+            - Arn
           Id: UsageUpdateLambda
   PermissionForEventsToInvokeLambda:
     Type: 'AWS::Lambda::Permission'
@@ -248,16 +241,6 @@ Resources:
     Properties:
       EventSourceArn: !GetAtt
         - AthenaQueriesQueue
-        - Arn
-      FunctionName: !GetAtt
-        - NotificationLambda
-        - Arn
-      BatchSize: 1
-  EventSourceMappingNotifierAnomalyDetection:
-    Type: 'AWS::Lambda::EventSourceMapping'
-    Properties:
-      EventSourceArn: !GetAtt
-        - AthenaAnomalyDetectionQueue
         - Arn
       FunctionName: !GetAtt
         - NotificationLambda

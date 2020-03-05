@@ -3,16 +3,17 @@ This file contains a lambda function reacting to cloudtrail events that a new at
 It adds new entries to a dynamodb table containing all queries
 """
 
-import boto3
-import json
 import gzip
+import json
 import logging
 from datetime import datetime, timezone
 from io import BytesIO
 
-import settings
-from model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
-from query_dao import QueryDao
+import boto3
+
+from . import settings
+from .model import AthenaQuery, QueryState, TIMESTAMP_FORMAT
+from .query_dao import QueryDao
 
 CLOUDTRAIL_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
