@@ -55,6 +55,8 @@ SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
 SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
 
 # Slack message to be sent when hard threshold is crossed (the one specified in SLACK_ALERT_DATA_USER_THRESHOLD or SLACK_ALERT_DATA_CHANNEL_THRESHOLD)
-SLACK_HARD_THRESHOLD_MESSAGE_1 = '{user} your last query scanned {data_scanned_gb} GB'
-SLACK_HARD_THRESHOLD_MESSAGE_2 = 'example_text_2'
-SLACK_HARD_THRESHOLD_MESSAGE_3 = 'example_text_3'
+SLACK_HARD_THRESHOLD_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
+
+# Slack additional messages to be sent when hard threshold is crossed (To send different messages to the public channel and the private channel of the user)
+SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_1 = 'Message priority: <priority_symbol> Runbook: <link_to_documentation_page>'
+SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_2 = 'Learn more: <link_to_documentation_how_to_improve_Athena_query_performance> about '
