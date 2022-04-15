@@ -45,12 +45,13 @@ class HardThresholdNotificator(Notificator):
             user=query.executing_user
         )
 
-        text = self.config.SLACK_HARD_THRESHOLD_MESSAGE.format(**params)
-        text_additional = self.config.SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL.format(**params)
+        text_1 = self.config.SLACK_HARD_THRESHOLD_MESSAGE_1.format(**params)
+        text_2 = self.config.SLACK_HARD_THRESHOLD_MESSAGE_2.format(**params)
+        text_3 = self.config.SLACK_HARD_THRESHOLD_MESSAGE_3.format(**params)
         if is_send_to_admin_channel:
-            self.send_slack_to_channel(text+text_additional)
+            self.send_slack_to_channel(text_1 + text_2)
         if not slack_user:
             logger.warning(f'Couldn\'t find slack user mapping for user {query.executing_user}')
         else:
             if is_send_to_user:
-                self.send_slack_to_user(slack_user, text)
+                self.send_slack_to_user(slack_user, text_1 + text_3)

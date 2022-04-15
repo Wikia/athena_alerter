@@ -55,7 +55,6 @@ SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
 SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
 
 # Slack message to be sent when hard threshold is crossed (the one specified in SLACK_ALERT_DATA_USER_THRESHOLD or SLACK_ALERT_DATA_CHANNEL_THRESHOLD)
-SLACK_HARD_THRESHOLD_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
-
-# Slack additional message to be sent when hard threshold is crossed (Lets you add an optional message. As a result, you can send different messages to different Slack channels.)
-SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL = 'additional_message'
+SLACK_HARD_THRESHOLD_MESSAGE_1 = '{user} your last query scanned {data_scanned_gb} GB'
+SLACK_HARD_THRESHOLD_MESSAGE_2 = 'example_text_2'
+SLACK_HARD_THRESHOLD_MESSAGE_3 = 'example_text_3'
