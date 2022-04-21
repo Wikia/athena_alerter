@@ -30,7 +30,7 @@ class TestHardThresholdNotificator(unittest.TestCase):
                                       json={'channel': 'test_channel', 'text': 'tests message'})
 
     @patch('bin.notificators.notificator.requests')
-    def test_handle_batch_event_test_separate_thresholds(self, requests):
+    def test_handle_batch_event_test_separate_thresholds_channel_only(self, requests):
         # we should get only one API call as user threshold is above the actual value and channel threshold is below
         # please be advised that if slack API will change in the future...
         # ...this tests may start to fail (as more than one requests may be needed)
@@ -45,7 +45,7 @@ class TestHardThresholdNotificator(unittest.TestCase):
         sut = HardThresholdNotificator(config)
         sut.handle_batch_event(events)
 
-        requests.post.assert_any_call('url', json={'text': 'tests message', 'link_names': 1})
+        requests.post.assert_any_call('url', json={'text': 'tests message\ntext message admin channel', 'link_names': 1})
         requests.post.assert_called_once()
 
     @patch('bin.notificators.notificator.requests')
