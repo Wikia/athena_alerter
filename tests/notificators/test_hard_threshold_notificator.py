@@ -21,16 +21,22 @@ class TestHardThresholdNotificator(unittest.TestCase):
         sut = HardThresholdNotificator(config)
         sut.handle_batch_event(events)
 
-        requests.post.assert_any_call('url', json={'text': 'tests message', 'link_names': 1})
+        # assert channel message happened
+        requests.post.assert_any_call('url', json={'text': 'tests message\ntext message admin channel', 'link_names': 1})
+
+
+        # assert private message was sent
+        # assert POST to Slack with conversation start request was sent
         requests.post.assert_any_call('https://slack.com/api/conversations.open',
                                       headers={'Authorization': 'Bearer token'},
                                       json={'users': 'mapped_user'})
+        # assert message to user was sent
         requests.post.assert_any_call('https://slack.com/api/chat.postMessage',
                                       headers={'Authorization': 'Bearer token'},
-                                      json={'channel': 'test_channel', 'text': 'tests message'})
+                                      json={'channel': 'test_channel', 'text': 'tests message\ntext message private user'})
 
     @patch('bin.notificators.notificator.requests')
-    def test_handle_batch_event_test_separate_thresholds(self, requests):
+    def test_handle_batch_event_test_separate_thresholds_channel_only(self, requests):
         # we should get only one API call as user threshold is above the actual value and channel threshold is below
         # please be advised that if slack API will change in the future...
         # ...this tests may start to fail (as more than one requests may be needed)
@@ -45,7 +51,7 @@ class TestHardThresholdNotificator(unittest.TestCase):
         sut = HardThresholdNotificator(config)
         sut.handle_batch_event(events)
 
-        requests.post.assert_any_call('url', json={'text': 'tests message', 'link_names': 1})
+        requests.post.assert_any_call('url', json={'text': 'tests message\ntext message admin channel', 'link_names': 1})
         requests.post.assert_called_once()
 
     @patch('bin.notificators.notificator.requests')

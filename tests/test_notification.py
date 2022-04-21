@@ -25,6 +25,8 @@ class NotificationTest(unittest.TestCase):
         config.NOTIFICATORS = notificators
         config.SLACK_USER_MAPPINGS = {'test': 'mapped_user'}
         config.SLACK_HARD_THRESHOLD_MESSAGE = 'tests message'
+        config.SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_ADMIN_MAIN_CHANNEL = 'text message admin channel'
+        config.SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_PRIVATE_MESSAGE = 'text message private user'
         config.SLACK_WEBHOOK_URL = 'url'
         config.SLACK_BOT_TOKEN = 'token'
         config.CLOUDWATCH_METRIC_NAMESPACE = 'athena_alerter'

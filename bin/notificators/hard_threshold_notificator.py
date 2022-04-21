@@ -1,7 +1,6 @@
 import json
 import logging
 from typing import Mapping
-
 from ..model import AthenaQuery
 from .notificator import Notificator
 
@@ -34,6 +33,10 @@ class HardThresholdNotificator(Notificator):
         if is_send_to_user or is_send_to_admin_channel:
             self.send_slack_notification(query, is_send_to_user, is_send_to_admin_channel)
 
+    @staticmethod
+    def _format_lines(lines):
+        return lines if isinstance(lines, str) else "\n".join(lines)
+
     def send_slack_notification(self, query, is_send_to_user=True, is_send_to_admin_channel=True):
         slack_user = None
         if hasattr(self.config, 'SLACK_USER_MAPPINGS'):
@@ -44,12 +47,13 @@ class HardThresholdNotificator(Notificator):
             slack_user_id=slack_user,
             user=query.executing_user
         )
-
         text = self.config.SLACK_HARD_THRESHOLD_MESSAGE.format(**params)
+        text_additional_admin_main_channel = self.config.SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_ADMIN_MAIN_CHANNEL.format(**params)
+        text_additional_private_channel = self.config.SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_PRIVATE_MESSAGE.format(**params)
         if is_send_to_admin_channel:
-            self.send_slack_to_channel(text)
+            self.send_slack_to_channel(self._format_lines(lines=[text, text_additional_admin_main_channel]))
         if not slack_user:
             logger.warning(f'Couldn\'t find slack user mapping for user {query.executing_user}')
         else:
             if is_send_to_user:
-                self.send_slack_to_user(slack_user, text)
+                self.send_slack_to_user(slack_user, self._format_lines(lines=[text, text_additional_private_channel]))
