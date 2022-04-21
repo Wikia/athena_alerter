@@ -24,14 +24,13 @@ class TestHardThresholdNotificator(unittest.TestCase):
         # assert channel message happened
         requests.post.assert_any_call('url', json={'text': 'tests message\ntext message admin channel', 'link_names': 1})
 
-        # assert private message was sent
 
-        # Assert POST to Slack with conversation start request was sent
+        # assert private message was sent
+        # assert POST to Slack with conversation start request was sent
         requests.post.assert_any_call('https://slack.com/api/conversations.open',
                                       headers={'Authorization': 'Bearer token'},
                                       json={'users': 'mapped_user'})
-
-        # Assert message to user was sent
+        # assert message to user was sent
         requests.post.assert_any_call('https://slack.com/api/chat.postMessage',
                                       headers={'Authorization': 'Bearer token'},
                                       json={'channel': 'test_channel', 'text': 'tests message\ntext message private user'})
