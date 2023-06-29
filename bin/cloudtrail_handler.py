@@ -58,12 +58,16 @@ class CloudtrailHandler:
         if record.get('responseElements') and record.get('userIdentity'):
             time = datetime.strptime(record['eventTime'], CLOUDTRAIL_TIME_FORMAT).replace(
                 tzinfo=timezone.utc)
+            if record['userIdentity']['type'] == 'IAMUser':
+                inferred_executing_user = record['userIdentity']['userName']
+            if record['userIdentity']['type'] == 'AssumedRole':
+                inferred_executing_user = 'API'
             query = AthenaQuery(
                 start_date=datetime.strftime(time, '%Y-%m-%d'),
                 start_timestamp=datetime.strftime(time, TIMESTAMP_FORMAT),
                 query_execution_id=record['responseElements']['queryExecutionId'],
                 query_state=QueryState.RUNNING.value,
-                executing_user=record['userIdentity']['userName'],
+                executing_user=inferred_executing_user,
                 data_scanned=0,
                 query_sql=None)
 
