@@ -1,0 +1,248 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  CloudtrailBucket:
+    Type: String
+    Description: S3 Bucket with cloudtrail logs
+  LambdaS3Bucket:
+    Type: String
+    Description: S3 Bucket with lambda function code
+  LambdaS3Key:
+    Type: String
+    Description: S3 Key with lambda function code
+  DynamoDBTableName:
+    Type: String
+    Description: S3 Key with lambda function code
+  SQSQueueName:
+    Type: String
+    Description: Name of SQS queue with athena query events
+  RequestsLayer:
+    Type: String
+    Description: ARN address of Lambda Layer with python3's requests - you may need to host your own
+Resources:
+  QueriesDynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: !Ref DynamoDBTableName
+      AttributeDefinitions:
+        - AttributeName: start_date
+          AttributeType: S
+        - AttributeName: start_timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: start_date
+          KeyType: HASH
+        - AttributeName: start_timestamp
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: '5'
+        WriteCapacityUnits: '5'
+  CloudtrailWriteLogs:
+    Type: 'AWS::CloudTrail::Trail'
+    DependsOn: CloudtrailBucketPolicy
+    Properties:
+      IncludeGlobalServiceEvents: true
+      IsLogging: 'true'
+      S3BucketName: !Ref CloudtrailS3Bucket
+  CloudtrailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: CloudtrailS3Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:GetBucketAcl"
+            Effect: "Allow"
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:s3:::"
+                  - Ref: "CloudtrailBucket"
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+          - Action:
+              - "s3:PutObject"
+            Effect: "Allow"
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:s3:::"
+                  - Ref: "CloudtrailBucket"
+                  - "/*"
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+            Condition:
+              StringEquals:
+                "s3:x-amz-acl": "bucket-owner-full-control"
+  S3CloudtrailLambdaPolicy:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !GetAtt
+        - CloudtrailHandlerLambda
+        - Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+  CloudtrailS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    DependsOn: S3CloudtrailLambdaPolicy
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      BucketName: !Ref CloudtrailBucket
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Function: !GetAtt
+              - CloudtrailHandlerLambda
+              - Arn
+            Event: 's3:ObjectCreated:*'
+  AthenaQueriesQueue:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      QueueName: !Ref SQSQueueName
+      DelaySeconds: '0'
+      MaximumMessageSize: '262144'
+      MessageRetentionPeriod: '345600'
+      ReceiveMessageWaitTimeSeconds: '0'
+      VisibilityTimeout: '30'
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:*'
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow
+                Action:
+                  - 'sqs:ReceiveMessage'
+                  - 'sqs:SendMessage'
+                  - 'sqs:DeleteMessage'
+                  - 'sqs:GetQueueAttributes'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:sqs:*:*:'
+                    - !Ref SQSQueueName
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:BatchGetItem'
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:Scan'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:UpdateItem'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:dynamodb:*:*:table/'
+                    - !Ref DynamoDBTableName
+              - Effect: Allow
+                Action:
+                  - 'athena:GetQueryExecution'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - !Ref CloudtrailBucket
+                    - /*
+  CloudtrailHandlerLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Description: Handles cloudtrail logs and writes athena queries to DynamoDB
+      FunctionName: athena_alerter_cloudtrail_handler
+      Handler: bin.cloudtrail_handler.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
+      MemorySize: 128
+      Role: !GetAtt
+        - LambdaExecutionRole
+        - Arn
+      Runtime: python3.7
+      Timeout: 10
+  UsageUpdateLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Description: Updates athena data scanned stats in DynamoDB
+      FunctionName: athena_alerter_usage_updater
+      Handler: bin.usage_update.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
+      MemorySize: 128
+      Role: !GetAtt
+        - LambdaExecutionRole
+        - Arn
+      Runtime: python3.7
+      Timeout: 10
+  NotificationLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Description: Updates athena data scanned stats in DynamoDB
+      FunctionName: athena_alerter_notification
+      Handler: bin.notification.lambda_handler
+      Layers:
+        - !Ref RequestsLayer
+      MemorySize: 128
+      Role: !GetAtt
+        - LambdaExecutionRole
+        - Arn
+      Runtime: python3.7
+      Timeout: 10
+  ScheduledRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: ScheduledRule
+      ScheduleExpression: 'rate(1 minute)'
+      Targets:
+        - Arn: !GetAtt
+            - UsageUpdateLambda
+            - Arn
+          Id: UsageUpdateLambda
+  PermissionForEventsToInvokeLambda:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref UsageUpdateLambda
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt
+        - ScheduledRule
+        - Arn
+  EventSourceMappingNotifierHardThreshold:
+    Type: 'AWS::Lambda::EventSourceMapping'
+    Properties:
+      EventSourceArn: !GetAtt
+        - AthenaQueriesQueue
+        - Arn
+      FunctionName: !GetAtt
+        - NotificationLambda
+        - Arn
+      BatchSize: 1
