@@ -177,12 +177,12 @@ Resources:
       Handler: bin.cloudtrail_handler.lambda_handler
       Layers:
         - !Ref RequestsLayer
-      MemorySize: 128
+      MemorySize: 512
       Role: !GetAtt
         - LambdaExecutionRole
         - Arn
       Runtime: python3.7
-      Timeout: 10
+      Timeout: 30
   UsageUpdateLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
@@ -194,12 +194,12 @@ Resources:
       Handler: bin.usage_update.lambda_handler
       Layers:
         - !Ref RequestsLayer
-      MemorySize: 128
+      MemorySize: 256
       Role: !GetAtt
         - LambdaExecutionRole
         - Arn
       Runtime: python3.7
-      Timeout: 10
+      Timeout: 20
   NotificationLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
