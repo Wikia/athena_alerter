@@ -6,8 +6,6 @@ It's intended to keep your athena usage/bill in check and build awareness among 
 
 Currently slack notifications are supported. These are sent to a channel and optionally as direct messages. However, given the very modular nature of this project you can easly adjust it to provide different types of alerts. Information about finished queries is sent to a SQS queue, so you may build a custom consumer which sends this information e.g. via e-mail or pushes to some (No)SQL storage.
 
-In future, we are planning to provide aggregated mothly user stats visualized on our open source dashboard [discreETLy](https://github.com/Wikia/discreETLy)
-
 ## Costs
 Athena alerter uses AWS infrastructure which you have to pay for. However, only serverless components are used and the actual amount of processed data is small, unless you are executing thousands of athena queries a minute. In typical use cases, the cost of each component should not exceed a few dollars a month. Componenets include:
 - Three lambda functions. One invoked once a minute, one for every cloudtrail log file, one for each finished athena query,
