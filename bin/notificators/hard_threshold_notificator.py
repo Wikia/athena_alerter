@@ -44,8 +44,10 @@ class HardThresholdNotificator(Notificator):
         params = dict(
             data_scanned_bytes=query.data_scanned,
             data_scanned_gb=int(query.data_scanned / (1024 * 1024 * 1024)),
+            data_scanned_cost=round((query.data_scanned / (1024 * 1024 * 1024 * 1024)) * self.config.ATHENA_PRICE_PER_TB, 2),
             slack_user_id=slack_user,
-            user=query.executing_user
+            user=query.executing_user,
+            query_sql=query.query_sql
         )
         text = self.config.SLACK_HARD_THRESHOLD_MESSAGE.format(**params)
         text_additional_admin_main_channel = self.config.SLACK_HARD_THRESHOLD_MESSAGE_ADDITIONAL_ADMIN_MAIN_CHANNEL.format(**params)

@@ -31,6 +31,7 @@ class NotificationTest(unittest.TestCase):
         config.SLACK_BOT_TOKEN = 'token'
         config.CLOUDWATCH_METRIC_NAMESPACE = 'athena_alerter'
         config.CLOUDWATCH_METRIC_NAME = 'athena_alerter_bytes_scanned_test'
+        config.ATHENA_PRICE_PER_TB = 5.0
         return config
 
 
