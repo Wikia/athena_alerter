@@ -54,6 +54,9 @@ SLACK_ALERT_DATA_USER_THRESHOLD = 100*1024*1024*1024
 # Data scanned byte threshold above which to send notifications to the admin team channel
 SLACK_ALERT_DATA_CHANNEL_THRESHOLD = 4 * SLACK_ALERT_DATA_USER_THRESHOLD
 
+# Price per TB of data scanned in Athena
+ATHENA_PRICE_PER_TB = 5.0  # $ per TB
+
 # Slack message to be sent when hard threshold is crossed (the one specified in SLACK_ALERT_DATA_USER_THRESHOLD or SLACK_ALERT_DATA_CHANNEL_THRESHOLD)
 SLACK_HARD_THRESHOLD_MESSAGE = '{user} your last query scanned {data_scanned_gb} GB'
 
