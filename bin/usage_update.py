@@ -16,9 +16,9 @@ from .query_dao import QueryDao
 
 
 def lambda_handler(event, context):
-    athena = boto3.client('athena')
-    sqs = boto3.client('sqs')
-    dynamodb = boto3.resource('dynamodb')
+    athena = boto3.client("athena")
+    sqs = boto3.client("sqs")
+    dynamodb = boto3.resource("dynamodb")
     query_dao = QueryDao(settings, dynamodb)
 
     updater = UsageUpdater(settings, query_dao, athena, sqs)
@@ -38,12 +38,12 @@ class UsageUpdater:
         queries = [query for query in queries if query.query_state == QueryState.RUNNING.value]
         for query in queries:
             details = self.get_query_details(query_execution_id=query.query_execution_id)
-            if details.get('query_state') not in [QueryState.QUEUED.value, QueryState.RUNNING.value]:
-                query.query_state = details['query_state']
-                query.data_scanned = details['data_scanned']
-                query.query_sql = details['query']
-                if hasattr(self.config, 'USER_MAPPING_FUNCTION'):
-                    mapped_user = self.config.USER_MAPPING_FUNCTION(details['query'])
+            if details.get("query_state") not in [QueryState.QUEUED.value, QueryState.RUNNING.value]:
+                query.query_state = details["query_state"]
+                query.data_scanned = details["data_scanned"]
+                query.query_sql = details["query"]
+                if hasattr(self.config, "USER_MAPPING_FUNCTION"):
+                    mapped_user = self.config.USER_MAPPING_FUNCTION(details["query"])
                     if mapped_user:
                         query.executing_user = mapped_user
                 self.query_dao.update_query(query)
@@ -64,14 +64,12 @@ class UsageUpdater:
 
     def get_query_details(self, query_execution_id):
         response = self.athena.get_query_execution(QueryExecutionId=query_execution_id)
-        execution = response['QueryExecution']
+        execution = response["QueryExecution"]
         return dict(
-            query_state=execution['Status']['State'],
-            data_scanned=execution.get('Statistics', {}).get('DataScannedInBytes', 0),
-            query=execution['Query']
+            query_state=execution["Status"]["State"],
+            data_scanned=execution.get("Statistics", {}).get("DataScannedInBytes", 0),
+            query=execution["Query"],
         )
 
     def send_event_query_updated(self, query):
-        self.sqs.send_message(
-            QueueUrl=self.config.SQS_QUEUE_URL,
-            MessageBody=json.dumps(dataclasses.asdict(query)))
+        self.sqs.send_message(QueueUrl=self.config.SQS_QUEUE_URL, MessageBody=json.dumps(dataclasses.asdict(query)))

@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from enum import Enum
 
-TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
+TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class QueryState(Enum):
-    QUEUED = 'QUEUED'
-    RUNNING = 'RUNNING'
-    SUCCEEDED = 'SUCCEEDED'
-    FAILED = 'FAILED'
-    CANCELLED = 'CANCELLED'
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
 
 
 @dataclass
