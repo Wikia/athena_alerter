@@ -58,10 +58,19 @@ class CloudtrailHandler:
         if record.get('responseElements') and record.get('userIdentity'):
             time = datetime.strptime(record['eventTime'], CLOUDTRAIL_TIME_FORMAT).replace(
                 tzinfo=timezone.utc)
+            inferred_executing_user = 'API'
             if record['userIdentity']['type'] == 'IAMUser':
                 inferred_executing_user = record['userIdentity']['userName']
             if record['userIdentity']['type'] == 'AssumedRole':
-                inferred_executing_user = 'API'
+                if 'arn' in record['userIdentity']:
+                    arn = record['userIdentity']['arn']
+                    arn_parts = arn.split('/')
+                    if len(arn_parts) >= 3:
+                        email = arn_parts[-1]
+                        if '@' in email:
+                            inferred_executing_user = email.split('@')[0]
+                        else:
+                            inferred_executing_user = email
             query = AthenaQuery(
                 start_date=datetime.strftime(time, '%Y-%m-%d'),
                 start_timestamp=datetime.strftime(time, TIMESTAMP_FORMAT),
