@@ -12,6 +12,9 @@ SLACK_BOT_TOKEN = ''
 #    'example_aws_user': 'IDXXXXXX'
 # }
 
+# Optional mapping of Email domain for SSO users
+# SLACK_EMAIL_DOMAIN = "example.com"
+
 # SQS queue url i.e. https://sqs.us-east-1.amazonaws.com/123456789012/athena-queries - note that you need to specify
 # this before that queue has been actually created. If in doubt you can always leave it empty and then update in
 # lambda aws console with the created url after cloudformation has run.

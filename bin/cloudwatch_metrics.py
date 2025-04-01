@@ -8,7 +8,7 @@ This class sends metrics about finished athena queries to Cloudwatch
 
 
 class CloudwatchMetrics:
-    cloudwatch = boto3.client('cloudwatch')
+    cloudwatch = boto3.client("cloudwatch")
 
     @classmethod
     def report_query_metric(cls, metric_value, user):
@@ -17,23 +17,17 @@ class CloudwatchMetrics:
         You just need to submit scanned size and the name of the user, who submitted the query
         """
         metric_data = cls._prepare_metric_dict(metric_value, user)
-        cls.cloudwatch.put_metric_data(
-            MetricData=metric_data,
-            Namespace=settings.CLOUDWATCH_METRIC_NAMESPACE
-        )
+        cls.cloudwatch.put_metric_data(MetricData=metric_data, Namespace=settings.CLOUDWATCH_METRIC_NAMESPACE)
 
     @classmethod
     def _prepare_metric_dict(cls, value, user):
         return [
             {
-                'MetricName': settings.CLOUDWATCH_METRIC_NAME,
-                'Dimensions': [
-                    {
-                        'Name': 'athena_user',
-                        'Value': user
-                    },
+                "MetricName": settings.CLOUDWATCH_METRIC_NAME,
+                "Dimensions": [
+                    {"Name": "athena_user", "Value": user},
                 ],
-                'Unit': 'Bytes',
-                'Value': value
+                "Unit": "Bytes",
+                "Value": value,
             },
         ]

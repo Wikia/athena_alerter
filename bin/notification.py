@@ -23,14 +23,12 @@ def lambda_handler(event, context):
     """
     notificators: Sequence[Notificator] = [notificator(config=settings) for notificator in settings.NOTIFICATORS]
 
-    for record in event['Records']:
+    for record in event["Records"]:
         for notificator in notificators:
             if notificator.is_record_type_handled(record):
-                notificator.handle_single_event(body=record['body'])
+                notificator.handle_single_event(body=record["body"])
                 break
         else:
             logging.error("ERROR! Unknown event type!")
             logging.debug(json.dumps(event))
             raise UnknownEventException("ERROR! Unknown event type!")
-
-

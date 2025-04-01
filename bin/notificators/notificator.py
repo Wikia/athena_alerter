@@ -33,29 +33,36 @@ class Notificator(ABC):
         """
         Sends slack notification to a channel defined in config
         """
-        requests.post(self.config.SLACK_WEBHOOK_URL, json={'text': text, 'link_names': 1})
+        requests.post(self.config.SLACK_WEBHOOK_URL, json={"text": text, "link_names": 1})
 
     def send_slack_to_user(self, user_id, text):
         """
         Sends slack notification to the user with submitted user_id
         """
-        response = requests.post('https://slack.com/api/conversations.open',
-                                 headers={'Authorization': f'Bearer {self.config.SLACK_BOT_TOKEN}'},
-                                 json={'users': user_id})
+        response = requests.post(
+            "https://slack.com/api/conversations.open",
+            headers={"Authorization": f"Bearer {self.config.SLACK_BOT_TOKEN}"},
+            json={"users": user_id},
+        )
         response.raise_for_status()
 
         if response.status_code == requests.codes.ok:
             j = response.json()
-            if j.get('channel'):
-                channel_id = j['channel']['id']
-                response = requests.post('https://slack.com/api/chat.postMessage',
-                                         headers={'Authorization': f'Bearer {self.config.SLACK_BOT_TOKEN}'},
-                                         json={'channel': channel_id, 'text': text})
+            if j.get("channel"):
+                channel_id = j["channel"]["id"]
+                response = requests.post(
+                    "https://slack.com/api/chat.postMessage",
+                    headers={"Authorization": f"Bearer {self.config.SLACK_BOT_TOKEN}"},
+                    json={"channel": channel_id, "text": text},
+                )
                 if response.status_code != requests.codes.ok:
-                    logging.error(f'Unexpected response from slack api when sending message: {response}')
+                    logging.error(f"Unexpected response from slack api when sending message: {response}")
             else:
-                logging.error(f'Unexpected response content from slack api when '
-                              f'opening conversation with user {user_id}: {response}')
+                logging.error(
+                    f"Unexpected response content from slack api when "
+                    f"opening conversation with user {user_id}: {response}"
+                )
         else:
             logging.error(
-                f'Unexpected response code from slack api when opening conversation with user {user_id}: {response}')
+                f"Unexpected response code from slack api when opening conversation with user {user_id}: {response}"
+            )
