@@ -33,9 +33,7 @@ Resources:
           KeyType: HASH
         - AttributeName: start_timestamp
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: '5'
-        WriteCapacityUnits: '5'
+      BillingMode: PAY_PER_REQUEST
   CloudtrailWriteLogs:
     Type: 'AWS::CloudTrail::Trail'
     DependsOn: CloudtrailBucketPolicy
